@@ -9,19 +9,20 @@ cd dist
 # Copy index.html to 404.html for GitHub Pages
 cp index.html 404.html
 
-# Initialize a new Git repository
-git init
+# Go back to the root directory
+cd ..
 
-# Add all files to the Git repository
-git add .
+# Switch to gh-pages branch
+git checkout gh-pages
+
+# Remove all files except .git and deploy.sh
+git rm -r --cached .
+git add dist/
 
 # Commit the changes
 git commit -m "Deploy to GitHub Pages"
 
 # Force push to the gh-pages branch
-git push -f git@github.com:YOUR_USERNAME/bingo-app.git main:gh-pages
-
-# Go back to the root directory
-cd ..
+git push -f origin gh-pages
 
 echo "Deployment complete!"
