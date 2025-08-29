@@ -131,24 +131,24 @@ const BingoCard = () => {
   };
 
   const renderCreateTab = () => (
-    <div className="flex flex-col items-start p-4">
-      <div ref={cardRef} className="grid grid-cols-5 gap-1 w-[28rem] h-[32rem]">
+    <div className="flex flex-col items-start p-2 sm:p-4">
+      <div ref={cardRef} className="grid grid-cols-5 gap-1 sm:gap-2 w-full max-w-sm mx-auto aspect-square">
         {cells.map((cell, index) => (
           <div
             key={index}
-            className={`border-2 border-gray-300 rounded p-2 ${
+            className={`border-2 border-gray-300 rounded p-1 sm:p-2 ${
               index === 12 ? 'bg-gray-100' : 'bg-white'
             }`}
           >
             {index === 12 ? (
-              <span className="text-gray-400 text-sm font-bold text-center w-full block">FREE</span>
+              <span className="text-gray-400 text-xs sm:text-sm font-bold text-center w-full block">FREE</span>
             ) : (
               <textarea
                 value={cell}
                 onChange={(e) => handleCellChange(index, e.target.value)}
-                className="w-full h-full resize-none focus:outline-none focus:border-blue-500 overflow-hidden p-1"
+                className="w-full h-full resize-none focus:outline-none focus:border-blue-500 overflow-hidden p-1 text-xs sm:text-sm"
                 placeholder="入力"
-                rows={3}
+                rows={2}
                 style={{ fontSize: textSizes[index] }}
               />
             )}
@@ -159,21 +159,21 @@ const BingoCard = () => {
   );
 
   const renderPlayTab = () => (
-    <div className="flex flex-col items-start p-4">
+    <div className="flex flex-col items-start p-2 sm:p-4">
       {bingoStatus.status === 'bingo' && (
-        <div className="mb-3 px-4 py-2 bg-yellow-100 border border-yellow-300 rounded">
-          <span className="text-lg font-bold text-yellow-800">
+        <div className="mb-3 px-3 sm:px-4 py-2 bg-yellow-100 border border-yellow-300 rounded">
+          <span className="text-base sm:text-lg font-bold text-yellow-800">
             {bingoStatus.bingoCount === 1 ? 'ビンゴ！' : `${bingoStatus.bingoCount}ビンゴ！`}
           </span>
         </div>
       )}
       
-      <div ref={cardRef} className="grid grid-cols-5 gap-1 w-[28rem] h-[32rem]">
+      <div ref={cardRef} className="grid grid-cols-5 gap-1 sm:gap-2 w-full max-w-sm mx-auto aspect-square">
         {cells.map((cell, index) => (
           <div
             key={index}
             onClick={() => handleCellClick(index)}
-            className={`border-2 border-gray-300 rounded p-2 cursor-pointer transition-all duration-200 ${
+            className={`border-2 border-gray-300 rounded p-1 sm:p-2 cursor-pointer transition-all duration-200 ${
               index === 12
                 ? 'bg-gray-100'
                 : highlightedCells.includes(index)
@@ -184,14 +184,14 @@ const BingoCard = () => {
             }`}
           >
             {index === 12 ? (
-              <span className="text-gray-400 text-sm font-bold text-center w-full block">FREE</span>
+              <span className="text-gray-400 text-xs sm:text-sm font-bold text-center w-full block">FREE</span>
             ) : (
               <textarea
                 value={cell}
                 readOnly
-                className="w-full h-full resize-none focus:outline-none focus:border-blue-500 overflow-hidden p-1 cursor-pointer"
+                className="w-full h-full resize-none focus:outline-none focus:border-blue-500 overflow-hidden p-1 text-xs sm:text-sm cursor-pointer"
                 placeholder="クリックしてマーク"
-                rows={3}
+                rows={2}
                 style={{ fontSize: textSizes[index] }}
               />
             )}
@@ -202,14 +202,14 @@ const BingoCard = () => {
   );
 
   return (
-    <div className="flex flex-col items-start p-4">
+    <div className="flex flex-col items-start p-2 sm:p-4 min-h-screen bg-gray-50">
       {/* タブUI */}
-      <div className="flex items-center gap-6 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">ビンゴツール</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6 w-full">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">ビンゴツール</h1>
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('create')}
-            className={`px-6 py-3 rounded-lg font-bold transition-all duration-200 border-2 ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition-all duration-200 border-2 text-sm sm:text-base ${
               activeTab === 'create'
                 ? 'bg-purple-500 text-white border-purple-500 shadow-lg'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
@@ -219,7 +219,7 @@ const BingoCard = () => {
           </button>
           <button
             onClick={() => setActiveTab('play')}
-            className={`px-6 py-3 rounded-lg font-bold transition-all duration-200 border-2 ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition-all duration-200 border-2 text-sm sm:text-base ${
               activeTab === 'play'
                 ? 'bg-green-500 text-white border-green-500 shadow-lg'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
@@ -228,16 +228,16 @@ const BingoCard = () => {
             プレイ
           </button>
         </div>
-        <div className="flex gap-4 ml-auto">
+        <div className="flex flex-wrap gap-2 sm:gap-4 ml-0 sm:ml-auto w-full sm:w-auto">
           <button
             onClick={saveAsImage}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded transition duration-200"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 sm:px-6 rounded transition duration-200 text-sm sm:text-base"
           >
             画像として保存
           </button>
           <button
             onClick={clearCard}
-            className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded transition duration-200"
+            className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 sm:px-6 rounded transition duration-200 text-sm sm:text-base"
           >
             クリア
           </button>
@@ -245,8 +245,10 @@ const BingoCard = () => {
       </div>
 
       {/* タブコンテンツ */}
-      {activeTab === 'create' && renderCreateTab()}
-      {activeTab === 'play' && renderPlayTab()}
+      <div className="w-full max-w-4xl mx-auto">
+        {activeTab === 'create' && renderCreateTab()}
+        {activeTab === 'play' && renderPlayTab()}
+      </div>
     </div>
   );
 };
