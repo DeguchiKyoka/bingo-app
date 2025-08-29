@@ -10,7 +10,7 @@ const BingoCard = () => {
   });
   const [textSizes, setTextSizes] = useState(Array(25).fill('14px'));
   const [markedCells, setMarkedCells] = useState(Array(25).fill(false));
-  const [bingoStatus, setBingoStatus] = useState(''); // 'bingo', 'reach', ''
+  const [bingoStatus, setBingoStatus] = useState({ status: '', bingoCount: 0, reachCount: 0 }); // 'bingo', 'reach', ''
   const [highlightedCells, setHighlightedCells] = useState([]); // ハイライト対象のセル
   const cardRef = useRef(null);
 
@@ -42,8 +42,10 @@ const BingoCard = () => {
     newMarkedCells[index] = !newMarkedCells[index];
     setMarkedCells(newMarkedCells);
     
-    // ビンゴ判定
-    checkBingo(newMarkedCells);
+    // ビンゴ判定（最新の状態で判定）
+    setTimeout(() => {
+      checkBingo(newMarkedCells);
+    }, 0);
   };
 
   const checkBingo = (markedCellsArray) => {
@@ -75,42 +77,16 @@ const BingoCard = () => {
     });
 
     if (bingoLines.length > 0) {
-      setBingoStatus('bingo');
-      // すべてのビンゴラインをハイライト
+      setBingoStatus({ status: 'bingo', bingoCount: bingoLines.length, reachCount: 0 });
+      // ビンゴラインを黄色でハイライト
       const allBingoCells = bingoLines.flat();
       setHighlightedCells(allBingoCells);
       return;
     }
 
-    // リーチチェック
-    const reachLines = [];
-    const highlightedCells = [];
-
-    lines.forEach(line => {
-      const markedCount = line.filter(index => markedCellsArray[index]).length;
-      
-      // 中央マスを含むラインは3マス埋まればリーチ、それ以外は4マス
-      const requiredMarks = line.includes(12) ? 3 : 4;
-      
-      if (markedCount === requiredMarks) {
-        reachLines.push(line);
-        // リーチラインの埋まったセルをハイライト（ビンゴマスは除く）
-        const lineHighlightedCells = line.filter(index =>
-          markedCellsArray[index] && !highlightedCells.includes(index)
-        );
-        highlightedCells.push(...lineHighlightedCells);
-      }
-    });
-
-    if (reachLines.length > 0) {
-      setBingoStatus('reach');
-      // 重複するセルを削除してハイライト
-      const uniqueHighlightedCells = [...new Set(highlightedCells)];
-      setHighlightedCells(uniqueHighlightedCells);
-    } else {
-      setBingoStatus('');
-      setHighlightedCells([]);
-    }
+    // リーチ状態は表示しないので、ハイライトも設定しない
+    setBingoStatus({ status: '', bingoCount: 0, reachCount: 0 });
+    setHighlightedCells([]);
   };
 
 
@@ -119,7 +95,13 @@ const BingoCard = () => {
       try {
         const canvas = await html2canvas(cardRef.current, {
           backgroundColor: '#ffffff',
-          scale: 2
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          width: cardRef.current.scrollWidth,
+          height: cardRef.current.scrollHeight,
+          scrollX: 0,
+          scrollY: 0
         });
         
         const link = document.createElement('a');
@@ -134,70 +116,68 @@ const BingoCard = () => {
   };
 
   const clearCard = () => {
-    const newCells = Array(25).fill('');
-    newCells[12] = ''; // 真ん中は空欄のまま
-    setCells(newCells);
-    
-    // 文字サイズもリセット
-    setTextSizes(Array(25).fill('14px'));
+    if (activeTab === 'create') {
+      // 作成画面：テキストと文字サイズをクリア
+      const newCells = Array(25).fill('');
+      newCells[12] = ''; // 真ん中は空欄のまま
+      setCells(newCells);
+      setTextSizes(Array(25).fill('14px'));
+    } else if (activeTab === 'play') {
+      // プレイ画面：マーク状態、ビンゴ表示、ハイライトをクリア
+      setMarkedCells(Array(25).fill(false));
+      setBingoStatus({ status: '', bingoCount: 0, reachCount: 0 });
+      setHighlightedCells([]);
+    }
   };
 
   const renderCreateTab = () => (
     <div className="flex flex-col items-start p-4">
-      <div ref={cardRef}>
-        <div className="grid grid-cols-5 gap-2 w-[28rem] h-[20rem]">
-          {cells.map((cell, index) => (
-            <div
-              key={index}
-              className={`border-2 border-gray-300 rounded p-3 ${
-                index === 12 ? 'bg-gray-100' : 'bg-white'
-              }`}
-            >
-              {index === 12 ? (
-                <span className="text-gray-400 text-sm font-bold text-center w-full block">FREE</span>
-              ) : (
-                <textarea
-                  value={cell}
-                  onChange={(e) => handleCellChange(index, e.target.value)}
-                  className="w-full h-full resize-none focus:outline-none focus:border-blue-500 overflow-hidden p-1"
-                  placeholder="入力"
-                  rows={3}
-                  style={{ fontSize: textSizes[index] }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+      <div ref={cardRef} className="grid grid-cols-5 gap-1 w-[28rem] h-[32rem]">
+        {cells.map((cell, index) => (
+          <div
+            key={index}
+            className={`border-2 border-gray-300 rounded p-2 ${
+              index === 12 ? 'bg-gray-100' : 'bg-white'
+            }`}
+          >
+            {index === 12 ? (
+              <span className="text-gray-400 text-sm font-bold text-center w-full block">FREE</span>
+            ) : (
+              <textarea
+                value={cell}
+                onChange={(e) => handleCellChange(index, e.target.value)}
+                className="w-full h-full resize-none focus:outline-none focus:border-blue-500 overflow-hidden p-1"
+                placeholder="入力"
+                rows={3}
+                style={{ fontSize: textSizes[index] }}
+              />
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 
   const renderPlayTab = () => (
     <div className="flex flex-col items-start p-4">
-      {bingoStatus === 'bingo' && (
+      {bingoStatus.status === 'bingo' && (
         <div className="mb-3 px-4 py-2 bg-yellow-100 border border-yellow-300 rounded">
-          <span className="text-lg font-bold text-yellow-800">ビンゴ！</span>
+          <span className="text-lg font-bold text-yellow-800">
+            {bingoStatus.bingoCount === 1 ? 'ビンゴ！' : `${bingoStatus.bingoCount}ビンゴ！`}
+          </span>
         </div>
       )}
       
-      {bingoStatus === 'reach' && (
-        <div className="mb-3 px-4 py-2 bg-blue-100 border border-blue-300 rounded">
-          <span className="text-lg font-bold text-blue-800">リーチ！</span>
-        </div>
-      )}
-      
-      <div className="grid grid-cols-5 gap-2 w-[28rem] h-[20rem]">
+      <div ref={cardRef} className="grid grid-cols-5 gap-1 w-[28rem] h-[32rem]">
         {cells.map((cell, index) => (
           <div
             key={index}
             onClick={() => handleCellClick(index)}
-            className={`border-2 border-gray-300 rounded p-3 cursor-pointer transition-all duration-200 ${
+            className={`border-2 border-gray-300 rounded p-2 cursor-pointer transition-all duration-200 ${
               index === 12
                 ? 'bg-gray-100'
                 : highlightedCells.includes(index)
-                  ? bingoStatus === 'bingo'
-                    ? 'bg-yellow-200 border-yellow-500'
-                    : 'bg-blue-200 border-blue-500'
+                  ? 'bg-yellow-200 border-yellow-500'
                   : markedCells[index]
                     ? 'bg-green-200 border-green-500'
                     : 'bg-white hover:bg-gray-50'
